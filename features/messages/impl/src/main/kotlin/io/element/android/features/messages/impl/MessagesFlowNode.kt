@@ -16,6 +16,7 @@
 
 package io.element.android.features.messages.impl
 
+import android.content.Context
 import android.os.Parcelable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -29,6 +30,8 @@ import com.bumble.appyx.navmodel.backstack.operation.push
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.element.android.anvilannotations.ContributesNode
+import io.element.android.features.call.ui.ElementCallActivity
+import io.element.android.features.call.CallType
 import io.element.android.features.location.api.Location
 import io.element.android.features.location.api.SendLocationEntryPoint
 import io.element.android.features.location.api.ShowLocationEntryPoint
@@ -50,12 +53,15 @@ import io.element.android.features.poll.api.create.CreatePollEntryPoint
 import io.element.android.libraries.architecture.BackstackNode
 import io.element.android.libraries.architecture.animation.rememberDefaultTransitionHandler
 import io.element.android.libraries.architecture.createNode
+import io.element.android.libraries.di.ApplicationContext
 import io.element.android.libraries.di.RoomScope
+import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.media.MediaSource
 import io.element.android.libraries.matrix.api.timeline.item.TimelineItemDebugInfo
+import io.element.android.libraries.matrix.api.widget.CallWidgetSettingsProvider
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.parcelize.Parcelize
 
@@ -63,6 +69,9 @@ import kotlinx.parcelize.Parcelize
 class MessagesFlowNode @AssistedInject constructor(
     @Assisted buildContext: BuildContext,
     @Assisted plugins: List<Plugin>,
+    @ApplicationContext private val context: Context,
+    private val matrixClient: MatrixClient,
+    private val callWidgetSettingsProvider: CallWidgetSettingsProvider,
     private val sendLocationEntryPoint: SendLocationEntryPoint,
     private val showLocationEntryPoint: ShowLocationEntryPoint,
     private val createPollEntryPoint: CreatePollEntryPoint,
@@ -148,6 +157,14 @@ class MessagesFlowNode @AssistedInject constructor(
 
                     override fun onCreatePollClicked() {
                         backstack.push(NavTarget.CreatePoll)
+                    }
+
+                    override fun onJoinCallClicked(roomId: RoomId) {
+                        val inputs = CallType.RoomCall(
+                            sessionId = matrixClient.sessionId,
+                            roomId = roomId,
+                        )
+                        ElementCallActivity.start(context, inputs)
                     }
                 }
                 createNode<MessagesNode>(buildContext, listOf(callback))

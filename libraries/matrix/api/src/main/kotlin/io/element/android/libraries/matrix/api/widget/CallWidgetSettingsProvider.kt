@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package io.element.android.features.call.di
+package io.element.android.libraries.matrix.api.widget
 
-import com.squareup.anvil.annotations.ContributesTo
-import io.element.android.features.call.ui.ElementCallActivity
-import io.element.android.libraries.di.AppScope
+import java.util.UUID
 
-@ContributesTo(AppScope::class)
-interface CallBindings {
-    fun inject(callActivity: ElementCallActivity)
+interface CallWidgetSettingsProvider {
+    fun provide(
+        baseUrl: String,
+        widgetId: String = UUID.randomUUID().toString()
+    ): MatrixWidgetSettings
 }

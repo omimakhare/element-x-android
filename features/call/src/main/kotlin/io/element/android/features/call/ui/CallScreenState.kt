@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package io.element.android.features.call.di
+package io.element.android.features.call.ui
 
-import com.squareup.anvil.annotations.ContributesTo
-import io.element.android.features.call.ui.ElementCallActivity
-import io.element.android.libraries.di.AppScope
+import io.element.android.libraries.architecture.Async
 
-@ContributesTo(AppScope::class)
-interface CallBindings {
-    fun inject(callActivity: ElementCallActivity)
-}
+data class CallScreenState(
+    val urlState: Async<String>,
+    val isInWidgetMode: Boolean,
+    val eventSink: (CallScreeEvents) -> Unit,
+)

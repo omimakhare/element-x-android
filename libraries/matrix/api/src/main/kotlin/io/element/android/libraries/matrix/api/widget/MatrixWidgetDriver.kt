@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package io.element.android.features.call.di
+package io.element.android.libraries.matrix.api.widget
 
-import com.squareup.anvil.annotations.ContributesTo
-import io.element.android.features.call.ui.ElementCallActivity
-import io.element.android.libraries.di.AppScope
+import kotlinx.coroutines.flow.Flow
 
-@ContributesTo(AppScope::class)
-interface CallBindings {
-    fun inject(callActivity: ElementCallActivity)
+interface MatrixWidgetDriver : AutoCloseable {
+    val incomingMessages: Flow<String>
+
+    suspend fun run()
+    suspend fun send(message: String)
 }

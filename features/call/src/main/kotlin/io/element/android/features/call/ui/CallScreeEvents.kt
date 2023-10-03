@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package io.element.android.features.call.di
+package io.element.android.features.call.ui
 
-import com.squareup.anvil.annotations.ContributesTo
-import io.element.android.features.call.ui.ElementCallActivity
-import io.element.android.libraries.di.AppScope
+import android.webkit.WebView
 
-@ContributesTo(AppScope::class)
-interface CallBindings {
-    fun inject(callActivity: ElementCallActivity)
+sealed interface CallScreeEvents {
+    data object Hangup : CallScreeEvents
+    data class SetupMessageChannels(val webView: WebView) : CallScreeEvents
 }

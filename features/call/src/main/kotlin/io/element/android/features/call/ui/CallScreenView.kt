@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.element.android.features.call
+package io.element.android.features.call.ui
 
 import android.annotation.SuppressLint
 import android.view.ViewGroup
@@ -30,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
+import io.element.android.features.call.R
+import io.element.android.libraries.architecture.Async
 import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Scaffold
@@ -40,10 +42,14 @@ import io.element.android.libraries.theme.ElementTheme
 
 typealias RequestPermissionCallback = (Array<String>) -> Unit
 
+interface CallScreenNavigator {
+    fun close()
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CallScreenView(
-    url: String?,
+    state: CallScreenState,
     userAgent: String,
     requestPermissions: (Array<String>, RequestPermissionCallback) -> Unit,
     onClose: () -> Unit,
@@ -69,12 +75,15 @@ internal fun CallScreenView(
                     .padding(padding)
                     .consumeWindowInsets(padding)
                     .fillMaxSize(),
-                url = url,
+                url = state.urlState,
                 userAgent = userAgent,
                 onPermissionsRequested = { request ->
                     val androidPermissions = mapWebkitPermissions(request.resources)
                     val callback: RequestPermissionCallback = { request.grant(it) }
                     requestPermissions(androidPermissions.toTypedArray(), callback)
+                },
+                onWebViewCreated = {
+                    state.eventSink(CallScreeEvents.SetupMessageChannels(it))
                 }
             )
         }
@@ -83,9 +92,10 @@ internal fun CallScreenView(
 
 @Composable
 private fun CallWebView(
-    url: String?,
+    url: Async<String>,
     userAgent: String,
     onPermissionsRequested: (PermissionRequest) -> Unit,
+    onWebViewCreated: (WebView) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val isInpectionMode = LocalInspectionMode.current
@@ -93,17 +103,19 @@ private fun CallWebView(
         modifier = modifier,
         factory = { context ->
             WebView(context).apply {
-                if (!isInpectionMode) {
-                    setup(userAgent, onPermissionsRequested)
-                    if (url != null) {
-                        loadUrl(url)
-                    }
+                setup(userAgent, onPermissionsRequested)
+                when {
+                    isInpectionMode -> Unit
+                    url is Async.Success -> loadUrl(url.data)
                 }
+
+                onWebViewCreated(this)
             }
         },
         update = { webView ->
-            if (!isInpectionMode && url != null) {
-                webView.loadUrl(url)
+            when {
+                isInpectionMode -> Unit
+                url is Async.Success && webView.url != url.data -> webView.loadUrl(url.data)
             }
         },
         onRelease = { webView ->
@@ -113,7 +125,10 @@ private fun CallWebView(
 }
 
 @SuppressLint("SetJavaScriptEnabled")
-private fun WebView.setup(userAgent: String, onPermissionsRequested: (PermissionRequest) -> Unit) {
+private fun WebView.setup(
+    userAgent: String,
+    onPermissionsRequested: (PermissionRequest) -> Unit,
+) {
     layoutParams = ViewGroup.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
         ViewGroup.LayoutParams.MATCH_PARENT
@@ -142,7 +157,11 @@ private fun WebView.setup(userAgent: String, onPermissionsRequested: (Permission
 internal fun CallScreenViewPreview() {
     ElementTheme {
         CallScreenView(
-            url = "https://call.element.io/some-actual-call?with=parameters",
+            state = CallScreenState(
+                urlState = Async.Success("https://call.element.io/some-actual-call?with=parameters"),
+                isInWidgetMode = false,
+                eventSink = {},
+            ),
             userAgent = "",
             requestPermissions = { _, _ -> },
             onClose = { },

@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package io.element.android.features.call.di
+package io.element.android.libraries.matrix.api.widget
 
-import com.squareup.anvil.annotations.ContributesTo
-import io.element.android.features.call.ui.ElementCallActivity
-import io.element.android.libraries.di.AppScope
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-@ContributesTo(AppScope::class)
-interface CallBindings {
-    fun inject(callActivity: ElementCallActivity)
+@Parcelize
+class MatrixWidgetSettings(
+    val id: String,
+    val initAfterContentLoad: Boolean,
+    val rawUrl: String,
+) : Parcelable {
+    companion object
 }

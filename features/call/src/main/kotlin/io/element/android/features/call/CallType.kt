@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package io.element.android.features.call.di
+package io.element.android.features.call
 
-import com.squareup.anvil.annotations.ContributesTo
-import io.element.android.features.call.ui.ElementCallActivity
-import io.element.android.libraries.di.AppScope
+import android.os.Parcelable
+import io.element.android.libraries.architecture.NodeInputs
+import io.element.android.libraries.matrix.api.core.RoomId
+import io.element.android.libraries.matrix.api.core.SessionId
+import kotlinx.parcelize.Parcelize
 
-@ContributesTo(AppScope::class)
-interface CallBindings {
-    fun inject(callActivity: ElementCallActivity)
+sealed interface CallType : NodeInputs, Parcelable {
+    @Parcelize
+    data class ExternalUrl(val url: String) : CallType
+
+    @Parcelize
+    data class RoomCall(
+        val sessionId: SessionId,
+        val roomId: RoomId,
+    ) : CallType
 }

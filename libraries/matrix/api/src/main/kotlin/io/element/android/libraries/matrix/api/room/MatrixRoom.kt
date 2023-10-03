@@ -30,6 +30,8 @@ import io.element.android.libraries.matrix.api.media.VideoInfo
 import io.element.android.libraries.matrix.api.poll.PollKind
 import io.element.android.libraries.matrix.api.room.location.AssetType
 import io.element.android.libraries.matrix.api.timeline.MatrixTimeline
+import io.element.android.libraries.matrix.api.widget.MatrixWidgetDriver
+import io.element.android.libraries.matrix.api.widget.MatrixWidgetSettings
 import kotlinx.coroutines.flow.StateFlow
 import java.io.Closeable
 import java.io.File
@@ -191,6 +193,10 @@ interface MatrixRoom : Closeable {
         waveform: List<Int>,
         progressCallback: ProgressCallback?
     ): Result<MediaUploadHandler>
+
+    suspend fun generateWidgetWebViewUrl(widgetSettings: MatrixWidgetSettings, clientId: String): Result<String>
+
+    fun getWidgetDriver(widgetSettings: MatrixWidgetSettings): Result<MatrixWidgetDriver>
 
     override fun close() = destroy()
 }
