@@ -43,6 +43,7 @@ class PreferencesRootNode @AssistedInject constructor(
     interface Callback : Plugin {
         fun onOpenBugReport()
         fun onVerifyClicked()
+        fun onSecureBackupClicked()
         fun onOpenAnalytics()
         fun onOpenAbout()
         fun onOpenDeveloperSettings()
@@ -57,6 +58,10 @@ class PreferencesRootNode @AssistedInject constructor(
 
     private fun onVerifyClicked() {
         plugins<Callback>().forEach { it.onVerifyClicked() }
+    }
+
+    private fun onSecureBackupClicked() {
+        plugins<Callback>().forEach { it.onSecureBackupClicked() }
     }
 
     private fun onOpenDeveloperSettings() {
@@ -110,6 +115,7 @@ class PreferencesRootNode @AssistedInject constructor(
             onOpenAnalytics = this::onOpenAnalytics,
             onOpenAbout = this::onOpenAbout,
             onVerifyClicked = this::onVerifyClicked,
+            onSecureBackupClicked = this::onSecureBackupClicked,
             onOpenDeveloperSettings = this::onOpenDeveloperSettings,
             onOpenAdvancedSettings = this::onOpenAdvancedSettings,
             onSuccessLogout = { onSuccessLogout(activity, it) },

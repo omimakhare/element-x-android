@@ -90,6 +90,8 @@ class PreferencesRootPresenter @Inject constructor(
             myUser = matrixUser.value,
             version = versionFormatter.get(),
             showCompleteVerification = showCompleteVerification,
+            showSecureBackup = true, // TODO Rust SDK
+            showSecureBackupBadge = true, // TODO Rust SDK
             accountManagementUrl = accountManagementUrl.value,
             devicesManagementUrl = devicesManagementUrl.value,
             showAnalyticsSettings = hasAnalyticsProviders,

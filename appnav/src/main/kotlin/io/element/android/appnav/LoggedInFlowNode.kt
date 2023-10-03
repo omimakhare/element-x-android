@@ -246,6 +246,10 @@ class LoggedInFlowNode @AssistedInject constructor(
                     override fun onVerifyClicked() {
                         backstack.push(NavTarget.VerifySession)
                     }
+
+                    override fun onSecureBackupClicked() {
+                        TODO("Not yet implemented")
+                    }
                 }
                 preferencesEntryPoint.nodeBuilder(this, buildContext)
                     .callback(callback)

@@ -50,6 +50,7 @@ fun PreferencesRootView(
     state: PreferencesRootState,
     onBackPressed: () -> Unit,
     onVerifyClicked: () -> Unit,
+    onSecureBackupClicked: () -> Unit,
     onManageAccountClicked: (url: String) -> Unit,
     onOpenAnalytics: () -> Unit,
     onOpenRageShake: () -> Unit,
@@ -82,6 +83,16 @@ fun PreferencesRootView(
                 icon = Icons.Outlined.VerifiedUser,
                 onClick = onVerifyClicked,
             )
+        }
+        if (state.showSecureBackup) {
+            PreferenceText(
+                title = "Secure backup", // TODO i18n
+                iconResourceId = CommonDrawables.ic_compound_lock,
+                showIconBadge = state.showSecureBackupBadge,
+                onClick = onSecureBackupClicked,
+            )
+        }
+        if (state.showCompleteVerification || state.showSecureBackup) {
             HorizontalDivider()
         }
         if (state.accountManagementUrl != null) {
@@ -180,6 +191,7 @@ private fun ContentToPreview(matrixUser: MatrixUser) {
         onOpenAdvancedSettings = {},
         onOpenAbout = {},
         onVerifyClicked = {},
+        onSecureBackupClicked = {},
         onSuccessLogout = {},
         onManageAccountClicked = {},
         onOpenNotificationSettings = {},
