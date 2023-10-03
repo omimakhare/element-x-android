@@ -31,8 +31,8 @@ import androidx.compose.ui.unit.dp
 import io.element.android.libraries.designsystem.R
 import io.element.android.libraries.designsystem.atomic.atoms.RoundedIconAtom
 import io.element.android.libraries.designsystem.atomic.atoms.RoundedIconAtomSize
-import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.preview.ElementPreview
+import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.theme.ElementTheme
 
@@ -45,6 +45,7 @@ import io.element.android.libraries.theme.ElementTheme
  * @param iconResourceId the resource id of the icon to display, exclusive with [iconImageVector]
  * @param iconImageVector the image vector of the icon to display, exclusive with [iconResourceId]
  * @param iconTint the tint to apply to the icon
+ * @param iconComposable a composable to display instead of the icon
  */
 @Composable
 fun IconTitleSubtitleMolecule(
@@ -54,16 +55,21 @@ fun IconTitleSubtitleMolecule(
     iconResourceId: Int? = null,
     iconImageVector: ImageVector? = null,
     iconTint: Color = MaterialTheme.colorScheme.primary,
+    iconComposable: @Composable ((modifier: Modifier) -> Unit)? = null,
 ) {
     Column(modifier) {
-        RoundedIconAtom(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally),
-            size = RoundedIconAtomSize.Large,
-            resourceId = iconResourceId,
-            imageVector = iconImageVector,
-            tint = iconTint,
-        )
+        if (iconComposable != null) {
+            iconComposable(Modifier.align(Alignment.CenterHorizontally))
+        } else {
+            RoundedIconAtom(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally),
+                size = RoundedIconAtomSize.Large,
+                resourceId = iconResourceId,
+                imageVector = iconImageVector,
+                tint = iconTint,
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = title,
