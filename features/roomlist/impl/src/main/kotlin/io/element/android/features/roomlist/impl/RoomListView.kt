@@ -172,6 +172,7 @@ fun RoomListContent(
         topBar = {
             RoomListTopBar(
                 matrixUser = state.matrixUser,
+                showAvatarIndicator = state.showAvatarIndicator,
                 areSearchResultsDisplayed = state.displaySearchResults,
                 onFilterChanged = { state.eventSink(RoomListEvents.UpdateFilter(it)) },
                 onToggleSearch = { state.eventSink(RoomListEvents.ToggleSearchResults) },

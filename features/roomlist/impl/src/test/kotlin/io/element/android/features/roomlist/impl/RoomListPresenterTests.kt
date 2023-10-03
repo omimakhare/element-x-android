@@ -83,6 +83,7 @@ class RoomListPresenterTests {
             Truth.assertThat(withUserState.matrixUser!!.userId).isEqualTo(A_USER_ID)
             Truth.assertThat(withUserState.matrixUser!!.displayName).isEqualTo(A_USER_NAME)
             Truth.assertThat(withUserState.matrixUser!!.avatarUrl).isEqualTo(AN_AVATAR_URL)
+            Truth.assertThat(withUserState.showAvatarIndicator).isFalse()
             scope.cancel()
         }
     }

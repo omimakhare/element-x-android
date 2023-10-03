@@ -109,6 +109,7 @@ class RoomListPresenter @Inject constructor(
 
         return RoomListState(
             matrixUser = matrixUser.value,
+            showAvatarIndicator = false, // TODO get the info from Rust
             roomList = roomList,
             filter = filter,
             filteredRoomList = filteredRoomList,

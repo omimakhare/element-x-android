@@ -49,6 +49,7 @@ open class RoomListStateProvider : PreviewParameterProvider<RoomListState> {
 
 internal fun aRoomListState() = RoomListState(
     matrixUser = MatrixUser(userId = UserId("@id:domain"), displayName = "User#1"),
+    showAvatarIndicator = false,
     roomList = aRoomListRoomSummaryList(),
     filter = "filter",
     filteredRoomList = aRoomListRoomSummaryList(),
