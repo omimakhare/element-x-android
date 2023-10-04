@@ -57,6 +57,7 @@ internal fun SimpleAlertDialogContent(
     title: String? = null,
     subtitle: @Composable (() -> Unit)? = null,
     submitText: String? = null,
+    destructiveSubmit: Boolean = false,
     onSubmitClicked: () -> Unit = {},
     thirdButtonText: String? = null,
     onThirdButtonClicked: () -> Unit = {},
@@ -76,6 +77,7 @@ internal fun SimpleAlertDialogContent(
         title = title,
         subtitle = subtitle,
         submitText = submitText,
+        destructiveSubmit = destructiveSubmit,
         onSubmitClicked = onSubmitClicked,
         thirdButtonText = thirdButtonText,
         onThirdButtonClicked = onThirdButtonClicked,
@@ -92,6 +94,7 @@ internal fun SimpleAlertDialogContent(
     title: String? = null,
     subtitle: @Composable (() -> Unit)? = null,
     submitText: String? = null,
+    destructiveSubmit: Boolean = false,
     onSubmitClicked: () -> Unit = {},
     thirdButtonText: String? = null,
     onThirdButtonClicked: () -> Unit = {},
@@ -124,6 +127,7 @@ internal fun SimpleAlertDialogContent(
                         text = submitText,
                         size = ButtonSize.Medium,
                         onClick = onSubmitClicked,
+                        destructive = destructiveSubmit,
                     )
                 }
             }
@@ -343,8 +347,10 @@ private fun AlertDialogFlowRow(
                 val arrangement = Arrangement.End
                 val mainAxisPositions = IntArray(childrenMainAxisSizes.size) { 0 }
                 with(arrangement) {
-                    arrange(mainAxisLayoutSize, childrenMainAxisSizes,
-                        layoutDirection, mainAxisPositions)
+                    arrange(
+                        mainAxisLayoutSize, childrenMainAxisSizes,
+                        layoutDirection, mainAxisPositions
+                    )
                 }
                 placeables.forEachIndexed { j, placeable ->
                     placeable.place(
@@ -383,22 +389,22 @@ internal object DialogContentDefaults {
     val containerColor: Color
         @Composable
         @ReadOnlyComposable
-        get()= ElementTheme.colors.bgCanvasDefault
+        get() = ElementTheme.colors.bgCanvasDefault
 
     val textContentColor: Color
         @Composable
         @ReadOnlyComposable
-        get()= ElementTheme.materialColors.onSurfaceVariant
+        get() = ElementTheme.materialColors.onSurfaceVariant
 
     val titleContentColor: Color
         @Composable
         @ReadOnlyComposable
-        get()= ElementTheme.materialColors.onSurface
+        get() = ElementTheme.materialColors.onSurface
 
     val iconContentColor: Color
         @Composable
         @ReadOnlyComposable
-        get()= ElementTheme.materialColors.primary
+        get() = ElementTheme.materialColors.primary
 }
 
 // Paddings for each of the dialog's parts. Taken from M3 source code.
@@ -455,6 +461,24 @@ internal fun DialogWithOnlyMessageAndOkButtonPreview() {
             SimpleAlertDialogContent(
                 content = "A dialog is a type of modal window that appears in front of app content to provide critical information, or prompt for a decision to be made. Learn more",
                 cancelText = "OK",
+                onCancelClicked = {},
+            )
+        }
+    }
+}
+
+@Preview(group = PreviewGroup.Dialogs, name = "Dialog with destructive button")
+@Composable
+@Suppress("MaxLineLength")
+internal fun DialogWithDestructiveButtonPreview() {
+    ElementThemedPreview(showBackground = false) {
+        DialogPreview {
+            SimpleAlertDialogContent(
+                title = "Dialog Title",
+                content = "A dialog with a destructive action",
+                cancelText = "Cancel",
+                submitText = "Delete",
+                destructiveSubmit = true,
                 onCancelClicked = {},
             )
         }
