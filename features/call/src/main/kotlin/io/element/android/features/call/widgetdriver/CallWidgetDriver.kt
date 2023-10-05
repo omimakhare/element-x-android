@@ -22,6 +22,7 @@ import io.element.android.libraries.matrix.impl.widget.DefaultCallWidgetSettings
 
 class CallWidgetDriver private constructor(
     val url: String,
+    val id: String,
     private val widgetDriver: MatrixWidgetDriver,
 ) : AutoCloseable {
 
@@ -34,7 +35,7 @@ class CallWidgetDriver private constructor(
             val widgetSettings = DefaultCallWidgetSettingsProvider().provide(baseUrl)
             val callUrl = room.generateWidgetWebViewUrl(widgetSettings, clientId).getOrThrow()
             val widgetDriver = room.getWidgetDriver(widgetSettings).getOrThrow()
-            return CallWidgetDriver(callUrl, widgetDriver)
+            return CallWidgetDriver(callUrl, widgetSettings.id, widgetDriver)
         }
     }
 

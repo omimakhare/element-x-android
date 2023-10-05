@@ -21,6 +21,7 @@ import android.view.ViewGroup
 import android.webkit.PermissionRequest
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -52,7 +53,6 @@ internal fun CallScreenView(
     state: CallScreenState,
     userAgent: String,
     requestPermissions: (Array<String>, RequestPermissionCallback) -> Unit,
-    onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ElementTheme {
@@ -64,12 +64,15 @@ internal fun CallScreenView(
                     navigationIcon = {
                         BackButton(
                             resourceId = CommonDrawables.ic_compound_close,
-                            onClick = onClose
+                            onClick = { state.eventSink(CallScreeEvents.Hangup) }
                         )
                     }
                 )
             }
         ) { padding ->
+            BackHandler {
+                state.eventSink(CallScreeEvents.Hangup)
+            }
             CallWebView(
                 modifier = Modifier
                     .padding(padding)
@@ -164,7 +167,6 @@ internal fun CallScreenViewPreview() {
             ),
             userAgent = "",
             requestPermissions = { _, _ -> },
-            onClose = { },
         )
     }
 }

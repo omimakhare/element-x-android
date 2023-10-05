@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -32,6 +33,7 @@ import io.element.android.libraries.architecture.Async
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.architecture.runCatchingUpdatingState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -52,15 +54,16 @@ class CallScreenPresenter @AssistedInject constructor(
         fun create(inputs: CallType, navigator: CallScreenNavigator): CallScreenPresenter
     }
 
-    // TODO: Move to a config file
+    // TODO: Move to a config file, restore `.io` domain
     companion object {
-        private const val BASE_URL = "https://call.element.io"
+        private const val BASE_URL = "https://call.element.dev"
     }
 
     private val isInWidgetMode = inputs is CallType.RoomCall
 
     @Composable
     override fun present(): CallScreenState {
+        val coroutineScope = rememberCoroutineScope()
         val urlState = remember { mutableStateOf<Async<String>>(Async.Uninitialized) }
         val callWidgetDriver = remember { mutableStateOf<CallWidgetDriver?>(null) }
         val messageInterceptor = remember { mutableStateOf<WidgetMessageInterceptor?>(null) }
@@ -99,8 +102,17 @@ class CallScreenPresenter @AssistedInject constructor(
         fun handleEvents(event: CallScreeEvents) {
             when (event) {
                 is CallScreeEvents.Hangup -> {
-                    callWidgetDriver.value?.close()
+                    val widgetId = callWidgetDriver.value?.id
+                    val interceptor = messageInterceptor.value
+                    if (widgetId != null && interceptor != null) {
+                        sendHangupMessage(widgetId, interceptor)
+                    }
+                    val widgetDriver = callWidgetDriver.value
+                    callWidgetDriver.value = null
                     navigator.close()
+                    coroutineScope.launch(Dispatchers.IO) {
+                        widgetDriver?.close()
+                    }
                 }
                 is CallScreeEvents.SetupMessageChannels -> {
                     messageInterceptor.value = WidgetMessageInterceptor(event.webView)
@@ -144,11 +156,24 @@ class CallScreenPresenter @AssistedInject constructor(
             .getOrNull()
     }
 
+    private fun sendHangupMessage(widgetId: String, messageInterceptor: WidgetMessageInterceptor) {
+        val message = WidgetMessage(
+            direction = WidgetMessage.Direction.ToWidget,
+            widgetId = widgetId,
+            requestId = "widgetapi-${System.currentTimeMillis()}",
+            action = WidgetMessage.Action.HangUp,
+        )
+        val json = Json.encodeToString(WidgetMessage.serializer(), message)
+        messageInterceptor.sendMessage(json)
+    }
+
 }
 
 @Serializable
 data class WidgetMessage(
     @SerialName("api") val direction: Direction,
+    @SerialName("widgetId") val widgetId: String,
+    @SerialName("requestId") val requestId: String,
     @SerialName("action") val action: Action,
 ) {
 

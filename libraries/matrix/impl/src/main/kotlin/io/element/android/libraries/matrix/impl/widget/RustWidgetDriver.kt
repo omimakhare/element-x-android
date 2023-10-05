@@ -18,7 +18,9 @@ package io.element.android.libraries.matrix.impl.widget
 
 import io.element.android.libraries.matrix.api.widget.MatrixWidgetDriver
 import io.element.android.libraries.matrix.api.widget.MatrixWidgetSettings
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.isActive
@@ -53,9 +55,15 @@ class RustWidgetDriver(
             // This call will suspend the coroutine while the driver is running, so it needs to be launched separately
             driverAndHandle.driver.run(room, widgetPermissionsProvider)
         }
-        receiveMessageJob = coroutineScope.launch {
-            while (isActive) {
-                driverAndHandle.handle.recv()?.let { incomingMessages.emit(it) }
+        receiveMessageJob = coroutineScope.launch(Dispatchers.IO) {
+            try {
+                while (isActive) {
+                    driverAndHandle.handle.recv()?.let { incomingMessages.emit(it) }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } finally {
+                driverAndHandle.handle.close()
             }
         }
     }
@@ -66,6 +74,6 @@ class RustWidgetDriver(
 
     override fun close() {
         receiveMessageJob?.cancel()
-        driverAndHandle.destroy()
+        driverAndHandle.driver.close()
     }
 }

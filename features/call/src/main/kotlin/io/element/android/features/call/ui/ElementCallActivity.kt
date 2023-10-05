@@ -36,9 +36,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.IntentCompat
 import com.bumble.appyx.core.integrationpoint.NodeComponentActivity
 import io.element.android.features.call.CallForegroundService
-import io.element.android.features.call.utils.CallIntentDataParser
 import io.element.android.features.call.CallType
 import io.element.android.features.call.di.CallBindings
+import io.element.android.features.call.utils.CallIntentDataParser
 import io.element.android.libraries.architecture.bindings
 import io.element.android.libraries.network.useragent.UserAgentProvider
 import io.element.android.libraries.theme.ElementTheme
@@ -85,7 +85,7 @@ class ElementCallActivity : NodeComponentActivity(), CallScreenNavigator {
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        setWebViewTarget(intent)
+        setCallType(intent)
 
         if (savedInstanceState == null) {
             updateUiMode(resources.configuration)
@@ -102,7 +102,6 @@ class ElementCallActivity : NodeComponentActivity(), CallScreenNavigator {
                 CallScreenView(
                     state = state,
                     userAgent = userAgent,
-                    onClose = this::finish,
                     requestPermissions = { permissions, callback ->
                         requestPermissionCallback = callback
                         requestPermissionsLauncher.launch(permissions)
@@ -121,7 +120,7 @@ class ElementCallActivity : NodeComponentActivity(), CallScreenNavigator {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        setWebViewTarget(intent)
+        setCallType(intent)
     }
 
     override fun onStart() {
@@ -151,7 +150,7 @@ class ElementCallActivity : NodeComponentActivity(), CallScreenNavigator {
         finish()
     }
 
-    private fun setWebViewTarget(intent: Intent?) {
+    private fun setCallType(intent: Intent?) {
         val inputs = intent?.let {
             IntentCompat.getParcelableExtra(it, EXTRA_CALL_WIDGET_SETTINGS, CallType::class.java)
         }
