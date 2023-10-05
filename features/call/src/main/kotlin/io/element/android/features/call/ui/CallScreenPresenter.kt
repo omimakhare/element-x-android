@@ -32,6 +32,7 @@ import io.element.android.features.call.widgetdriver.CallWidgetDriver
 import io.element.android.libraries.architecture.Async
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.architecture.runCatchingUpdatingState
+import io.element.android.libraries.network.useragent.UserAgentProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
@@ -45,6 +46,7 @@ import java.util.UUID
 
 class CallScreenPresenter @AssistedInject constructor(
     private val matrixClientsHolder: MatrixClientsHolder,
+    private val userAgentProvider: UserAgentProvider,
     @Assisted private val inputs: CallType,
     @Assisted private val navigator: CallScreenNavigator,
 ) : Presenter<CallScreenState> {
@@ -67,6 +69,7 @@ class CallScreenPresenter @AssistedInject constructor(
         val urlState = remember { mutableStateOf<Async<String>>(Async.Uninitialized) }
         val callWidgetDriver = remember { mutableStateOf<CallWidgetDriver?>(null) }
         val messageInterceptor = remember { mutableStateOf<WidgetMessageInterceptor?>(null) }
+        val userAgent = userAgentProvider.provide()
 
         LaunchedEffect(Unit) {
             loadUrl(inputs, urlState, callWidgetDriver)
@@ -122,6 +125,7 @@ class CallScreenPresenter @AssistedInject constructor(
 
         return CallScreenState(
             urlState = urlState.value,
+            userAgent = userAgent,
             isInWidgetMode = isInWidgetMode,
             eventSink = ::handleEvents,
         )

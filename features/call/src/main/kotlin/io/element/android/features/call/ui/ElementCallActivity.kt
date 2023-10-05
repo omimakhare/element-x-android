@@ -40,7 +40,6 @@ import io.element.android.features.call.CallType
 import io.element.android.features.call.di.CallBindings
 import io.element.android.features.call.utils.CallIntentDataParser
 import io.element.android.libraries.architecture.bindings
-import io.element.android.libraries.network.useragent.UserAgentProvider
 import io.element.android.libraries.theme.ElementTheme
 import javax.inject.Inject
 
@@ -60,7 +59,6 @@ class ElementCallActivity : NodeComponentActivity(), CallScreenNavigator {
         }
     }
 
-    @Inject lateinit var userAgentProvider: UserAgentProvider
     @Inject lateinit var callIntentDataParser: CallIntentDataParser
     @Inject lateinit var presenterFactory: CallScreenPresenter.Factory
 
@@ -94,14 +92,11 @@ class ElementCallActivity : NodeComponentActivity(), CallScreenNavigator {
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         requestAudioFocus()
 
-        val userAgent = userAgentProvider.provide()
-
         setContent {
             val state = presenter.present()
             ElementTheme {
                 CallScreenView(
                     state = state,
-                    userAgent = userAgent,
                     requestPermissions = { permissions, callback ->
                         requestPermissionCallback = callback
                         requestPermissionsLauncher.launch(permissions)

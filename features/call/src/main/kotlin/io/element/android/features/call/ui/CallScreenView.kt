@@ -51,7 +51,6 @@ interface CallScreenNavigator {
 @Composable
 internal fun CallScreenView(
     state: CallScreenState,
-    userAgent: String,
     requestPermissions: (Array<String>, RequestPermissionCallback) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -79,7 +78,7 @@ internal fun CallScreenView(
                     .consumeWindowInsets(padding)
                     .fillMaxSize(),
                 url = state.urlState,
-                userAgent = userAgent,
+                userAgent = state.userAgent,
                 onPermissionsRequested = { request ->
                     val androidPermissions = mapWebkitPermissions(request.resources)
                     val callback: RequestPermissionCallback = { request.grant(it) }
@@ -163,9 +162,9 @@ internal fun CallScreenViewPreview() {
             state = CallScreenState(
                 urlState = Async.Success("https://call.element.io/some-actual-call?with=parameters"),
                 isInWidgetMode = false,
+                userAgent = "",
                 eventSink = {},
             ),
-            userAgent = "",
             requestPermissions = { _, _ -> },
         )
     }
