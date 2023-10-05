@@ -125,6 +125,7 @@
   <string name="common_room_name_placeholder">"e.g. your project name"</string>
   <string name="common_search_for_someone">"Search for someone"</string>
   <string name="common_search_results">"Search results"</string>
+  <string name="common_secure_backup">"Secure backup"</string>
   <string name="common_security">"Security"</string>
   <string name="common_select_your_server">"Select your server"</string>
   <string name="common_sending">"Sending…"</string>

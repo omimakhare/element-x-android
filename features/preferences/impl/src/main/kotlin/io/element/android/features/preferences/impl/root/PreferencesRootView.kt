@@ -86,7 +86,7 @@ fun PreferencesRootView(
         }
         if (state.showSecureBackup) {
             PreferenceText(
-                title = "Secure backup", // TODO i18n
+                title = stringResource(id = CommonStrings.common_secure_backup),
                 iconResourceId = CommonDrawables.ic_compound_lock,
                 showIconBadge = state.showSecureBackupBadge,
                 onClick = onSecureBackupClicked,
