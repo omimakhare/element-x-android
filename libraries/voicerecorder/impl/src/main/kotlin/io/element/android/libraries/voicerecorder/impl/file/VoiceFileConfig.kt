@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package io.element.android.libraries.textcomposer.model
+package io.element.android.libraries.voicerecorder.impl.file
 
-sealed class VoiceMessageState {
-    data object Idle: VoiceMessageState()
-    data class Recording(
-        val level: Double,
-    ): VoiceMessageState()
-}
+/**
+ * File configuration for voice recording.
+ *
+ * @property cacheSubdir the subdirectory in the cache dir to use.
+ * @property fileExt the file extension for audio files.
+ */
+data class VoiceFileConfig(
+    val cacheSubdir: String,
+    val fileExt: String,
+)

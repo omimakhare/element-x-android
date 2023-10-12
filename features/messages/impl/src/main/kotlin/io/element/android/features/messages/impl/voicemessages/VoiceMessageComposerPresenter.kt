@@ -16,36 +16,84 @@
 
 package io.element.android.features.messages.impl.voicemessages
 
+import android.Manifest
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.di.RoomScope
 import io.element.android.libraries.di.SingleIn
+import io.element.android.libraries.matrix.api.room.MatrixRoom
+import io.element.android.libraries.permissions.api.PermissionsEvents
+import io.element.android.libraries.permissions.api.PermissionsPresenter
 import io.element.android.libraries.textcomposer.model.PressEvent
 import io.element.android.libraries.textcomposer.model.VoiceMessageState
+import io.element.android.libraries.voicerecorder.api.VoiceRecorder
+import io.element.android.services.analytics.api.AnalyticsService
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @SingleIn(RoomScope::class)
-class VoiceMessageComposerPresenter @Inject constructor() : Presenter<VoiceMessageComposerState> {
+class VoiceMessageComposerPresenter @Inject constructor(
+    private val voiceRecorder: VoiceRecorder,
+    private val analyticsService: AnalyticsService,
+    private val room: MatrixRoom,
+    permissionsPresenterFactory: PermissionsPresenter.Factory
+) : Presenter<VoiceMessageComposerState> {
+    private val permissionsPresenter = permissionsPresenterFactory.create(Manifest.permission.RECORD_AUDIO)
     @Composable
     override fun present(): VoiceMessageComposerState {
-        var voiceMessageState by remember { mutableStateOf<VoiceMessageState>(VoiceMessageState.Idle) }
+        val localCoroutineScope = rememberCoroutineScope()
+        var isRecording by remember { mutableStateOf(false) }
+        val voiceLevel by voiceRecorder.level.collectAsState(initial = 0.0)
+
+        val permissionState = permissionsPresenter.present()
 
         fun onRecordButtonPress(event: VoiceMessageComposerEvents.RecordButtonEvent) = when(event.pressEvent) {
             PressEvent.PressStart ->  {
-                // TODO start the recording
-                voiceMessageState = VoiceMessageState.Recording
+                Timber.i("Voice message record button pressed")
+                when {
+                    permissionState.permissionGranted -> {
+                        try {
+                            localCoroutineScope.launch {
+                                Timber.i("Voice message started recording")
+                                voiceRecorder.startRecord(groupId = room.roomId.value)
+                                // TODO: test error throw
+                            }
+                        } catch(e: SecurityException) {
+                            Timber.e("Voice message error", e)
+                            analyticsService.trackError(VoiceMessageException.ExpectedPermissionMissing("Expected permission to record but none", e))
+                        }
+                        isRecording = true
+                    }
+                    permissionState.shouldShowRationale -> {
+                        Timber.i("Voice message permission rationale needed")
+                        // show the rationale
+                    }
+                    else -> {
+                        permissionState.eventSink(PermissionsEvents.RequestPermissions)
+                    }
+                }
             }
             PressEvent.LongPressEnd -> {
-                // TODO finish the recording
-                voiceMessageState = VoiceMessageState.Idle
+                Timber.i("Voice message finished recording")
+                localCoroutineScope.launch {
+                    voiceRecorder.stopRecord()
+                }
+                isRecording = false
             }
             PressEvent.Tapped -> {
-                // TODO discard the recording and show the 'hold to record' tooltip
-                voiceMessageState = VoiceMessageState.Idle
+                Timber.i("Voice message deleted")
+                localCoroutineScope.launch {
+                    voiceRecorder.stopRecord()
+                    voiceRecorder.deleteRecording()
+                }
+                isRecording = false
             }
         }
 
@@ -57,8 +105,11 @@ class VoiceMessageComposerPresenter @Inject constructor() : Presenter<VoiceMessa
         }
 
         return VoiceMessageComposerState(
-            voiceMessageState = voiceMessageState,
-            eventSink = { handleEvents(it) }
+            voiceMessageState = when(isRecording) {
+                true -> VoiceMessageState.Recording(level = voiceLevel)
+                false -> VoiceMessageState.Idle
+            },
+            eventSink = { handleEvents(it) },
         )
     }
 }

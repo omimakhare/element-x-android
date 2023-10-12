@@ -13,12 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+plugins {
+    id("io.element.android-library")
+    alias(libs.plugins.anvil)
+}
 
-package io.element.android.libraries.textcomposer.model
+android {
+    namespace = "io.element.android.libraries.voicerecorder.api"
+}
 
-sealed class VoiceMessageState {
-    data object Idle: VoiceMessageState()
-    data class Recording(
-        val level: Double,
-    ): VoiceMessageState()
+anvil {
+    generateDaggerFactories.set(true)
+}
+
+dependencies {
+    implementation(libs.androidx.annotationjvm)
+    implementation(libs.coroutines.core)
 }

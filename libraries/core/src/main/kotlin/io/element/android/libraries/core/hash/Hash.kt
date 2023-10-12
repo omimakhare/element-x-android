@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
-package io.element.android.libraries.textcomposer.model
+package io.element.android.libraries.core.hash
 
-sealed class VoiceMessageState {
-    data object Idle: VoiceMessageState()
-    data class Recording(
-        val level: Double,
-    ): VoiceMessageState()
+import java.security.MessageDigest
+import java.util.Locale
+
+/**
+ * Compute a Hash of a String, using md5 algorithm.
+ */
+fun String.md5() = try {
+    val digest = MessageDigest.getInstance("md5")
+    digest.update(toByteArray())
+    digest.digest()
+        .joinToString("") { String.format("%02X", it) }
+        .lowercase(Locale.ROOT)
+} catch (exc: Exception) {
+    // Should not happen, but just in case
+    hashCode().toString()
 }

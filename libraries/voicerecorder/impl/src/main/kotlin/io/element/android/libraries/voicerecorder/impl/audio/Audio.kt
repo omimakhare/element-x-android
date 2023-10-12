@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package io.element.android.libraries.textcomposer.model
+package io.element.android.libraries.voicerecorder.impl.audio
 
-sealed class VoiceMessageState {
-    data object Idle: VoiceMessageState()
-    data class Recording(
-        val level: Double,
-    ): VoiceMessageState()
+internal sealed class Audio {
+    class Data(
+        val readSize: Int,
+        val buffer: ShortArray,
+    ) : Audio()
+
+    data class Error(
+        val audioRecordErrorCode: Int
+    ) : Audio()
 }

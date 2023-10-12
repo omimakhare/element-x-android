@@ -50,6 +50,7 @@ dependencies {
     implementation(projects.libraries.mediaupload.api)
     implementation(projects.libraries.permissions.api)
     implementation(projects.libraries.preferences.api)
+    implementation(projects.libraries.voicerecorder.api)
     implementation(projects.features.networkmonitor.api)
     implementation(projects.services.analytics.api)
     implementation(libs.coil.compose)
@@ -62,6 +63,7 @@ dependencies {
     implementation(libs.vanniktech.blurhash)
     implementation(libs.telephoto.zoomableimage)
     implementation(libs.matrix.emojibase.bindings)
+    implementation(libs.accompanist.permission)
 
     testImplementation(libs.test.junit)
     testImplementation(libs.coroutines.test)

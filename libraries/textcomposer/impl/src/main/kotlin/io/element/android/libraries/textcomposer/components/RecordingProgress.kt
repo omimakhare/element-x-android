@@ -20,7 +20,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,12 +32,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.airbnb.android.showkase.BuildConfig
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.theme.ElementTheme
 
 @Composable
 internal fun RecordingProgress(
+    level: Double,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -46,9 +50,7 @@ internal fun RecordingProgress(
                 shape = MaterialTheme.shapes.medium,
             )
             .padding(start = 12.dp, end = 20.dp, top = 8.dp, bottom = 8.dp)
-            .heightIn(26.dp)
-
-            ,
+            .heightIn(26.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -64,11 +66,39 @@ internal fun RecordingProgress(
             color = ElementTheme.colors.textSecondary,
             style = ElementTheme.typography.fontBodySmMedium
         )
+
+        Spacer(Modifier.size(20.dp))
+
+        // TODO Replace with waveform UI
+        DebugAudioLevel(
+            modifier = Modifier.weight(1f), level = level
+        )
+    }
+}
+
+@Composable
+private fun DebugAudioLevel(
+    modifier: Modifier,
+    level: Double,
+) {
+    if (BuildConfig.DEBUG) {
+        Box(
+            modifier = modifier
+                .height(26.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .fillMaxWidth(level.toFloat())
+                    .background(ElementTheme.colors.iconQuaternary, shape = MaterialTheme.shapes.small)
+                    .fillMaxHeight()
+            )
+        }
     }
 }
 
 @PreviewsDayNight
 @Composable
 internal fun RecordingProgressPreview() {
-    RecordingProgress()
+    RecordingProgress(0.5)
 }

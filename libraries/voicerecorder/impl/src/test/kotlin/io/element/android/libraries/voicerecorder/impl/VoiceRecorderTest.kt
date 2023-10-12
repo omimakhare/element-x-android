@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-package io.element.android.libraries.textcomposer.model
+package io.element.android.libraries.voicerecorder.impl
 
-sealed class VoiceMessageState {
-    data object Idle: VoiceMessageState()
-    data class Recording(
-        val level: Double,
-    ): VoiceMessageState()
+import com.google.common.truth.Truth.assertThat
+import io.element.android.libraries.matrix.test.A_ROOM_ID
+import io.element.android.libraries.matrix.test.A_SESSION_ID
+import io.element.android.libraries.matrix.test.A_THREAD_ID
+import org.junit.Test
+
+class VoiceRecorderTest {
+
+    @Test
+    fun `it records audio`() {
+        TODO()
+    }
 }

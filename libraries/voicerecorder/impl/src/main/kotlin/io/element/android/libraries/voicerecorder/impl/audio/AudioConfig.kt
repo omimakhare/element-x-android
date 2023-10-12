@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-package io.element.android.libraries.textcomposer.model
+package io.element.android.libraries.voicerecorder.impl.audio
 
-sealed class VoiceMessageState {
-    data object Idle: VoiceMessageState()
-    data class Recording(
-        val level: Double,
-    ): VoiceMessageState()
-}
+import android.media.AudioFormat
+import android.media.MediaRecorder.AudioSource
+
+/**
+ * Audio configuration for voice recording.
+ *
+ * @property source the audio source to use, see constants in [AudioSource]
+ * @property format the audio format to use, see [AudioFormat]
+ * @property bitRate the bitrate in bps
+ */
+data class AudioConfig(
+    val source: Int,
+    val format: AudioFormat,
+    val bitRate: Int,
+)
