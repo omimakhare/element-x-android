@@ -17,7 +17,10 @@
 package io.element.android.features.messages.impl.voicemessages
 
 internal sealed class VoiceMessageException : Exception() {
-    data class ExpectedPermissionMissing(
+    data class FileMissing(
+        override val message: String?, override val cause: Throwable? = null
+    ) : VoiceMessageException()
+    data class PermissionMissing(
         override val message: String?, override val cause: Throwable?
     ) : VoiceMessageException()
 }

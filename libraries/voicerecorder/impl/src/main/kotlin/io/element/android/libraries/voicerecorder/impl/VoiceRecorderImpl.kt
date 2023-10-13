@@ -78,7 +78,7 @@ class VoiceRecorderImpl @Inject constructor(
      *
      * Call [deleteRecording] to delete any recorded audio.
      */
-    override suspend fun stopRecord() {
+    override suspend fun stopRecord(): File? {
         Timber.i("Voice recorder stopped recording")
         recordingJob?.cancel()
 
@@ -86,6 +86,8 @@ class VoiceRecorderImpl @Inject constructor(
         audioRecorder = null
         encoder.release()
         level.emit(0.0)
+
+        return outputFile
     }
 
     /**

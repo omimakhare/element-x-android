@@ -154,7 +154,7 @@ fun TextComposer(
     }
 
     val recordingProgress = @Composable {
-        if(voiceMessageState is VoiceMessageState.Recording) {
+        if (voiceMessageState is VoiceMessageState.Recording) {
             RecordingProgress(voiceMessageState.level)
         }
     }

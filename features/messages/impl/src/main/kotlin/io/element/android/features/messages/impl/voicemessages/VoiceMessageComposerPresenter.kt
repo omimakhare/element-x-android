@@ -17,6 +17,11 @@
 package io.element.android.features.messages.impl.voicemessages
 
 import android.Manifest
+import android.content.Context
+import android.media.MediaMetadataRetriever
+import android.net.Uri
+import android.provider.MediaStore
+import android.webkit.MimeTypeMap
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,25 +29,34 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.database.getLongOrNull
+import androidx.core.database.getStringOrNull
+import androidx.core.net.toUri
 import io.element.android.libraries.architecture.Presenter
+import io.element.android.libraries.core.meta.BuildMeta
 import io.element.android.libraries.di.RoomScope
 import io.element.android.libraries.di.SingleIn
 import io.element.android.libraries.matrix.api.room.MatrixRoom
+import io.element.android.libraries.mediaupload.api.MediaSender
 import io.element.android.libraries.permissions.api.PermissionsEvents
 import io.element.android.libraries.permissions.api.PermissionsPresenter
 import io.element.android.libraries.textcomposer.model.PressEvent
 import io.element.android.libraries.textcomposer.model.VoiceMessageState
 import io.element.android.libraries.voicerecorder.api.VoiceRecorder
 import io.element.android.services.analytics.api.AnalyticsService
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @SingleIn(RoomScope::class)
 class VoiceMessageComposerPresenter @Inject constructor(
+    private val appCoroutineScope: CoroutineScope,
     private val voiceRecorder: VoiceRecorder,
     private val analyticsService: AnalyticsService,
     private val room: MatrixRoom,
+    private val mediaSender: MediaSender,
     permissionsPresenterFactory: PermissionsPresenter.Factory
 ) : Presenter<VoiceMessageComposerState> {
     private val permissionsPresenter = permissionsPresenterFactory.create(Manifest.permission.RECORD_AUDIO)
@@ -67,7 +81,7 @@ class VoiceMessageComposerPresenter @Inject constructor(
                             }
                         } catch(e: SecurityException) {
                             Timber.e("Voice message error", e)
-                            analyticsService.trackError(VoiceMessageException.ExpectedPermissionMissing("Expected permission to record but none", e))
+                            analyticsService.trackError(VoiceMessageException.FileMissing("Expected permission to record but none", e))
                         }
                         isRecording = true
                     }
@@ -82,8 +96,24 @@ class VoiceMessageComposerPresenter @Inject constructor(
             }
             PressEvent.LongPressEnd -> {
                 Timber.i("Voice message finished recording")
-                localCoroutineScope.launch {
-                    voiceRecorder.stopRecord()
+
+                // TODO refactor out
+                appCoroutineScope.launch {
+                    val file = voiceRecorder.stopRecord()
+                    if (file == null) {
+                        Timber.e("Voice message error: file was null")
+                        analyticsService.trackError(VoiceMessageException.FileMissing("File was null after recording"))
+                        return@launch
+                    }
+                    val result = mediaSender.sendVoiceMessage(
+                        uri = file.toUri(),
+                        mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension) ?: "audio/ogg",
+                        progressCallback = null,
+                    )
+
+                    if(result.isFailure) {
+                        Timber.e("Voice message error: ${result.exceptionOrNull()}")
+                    }
                 }
                 isRecording = false
             }
@@ -105,7 +135,7 @@ class VoiceMessageComposerPresenter @Inject constructor(
         }
 
         return VoiceMessageComposerState(
-            voiceMessageState = when(isRecording) {
+            voiceMessageState = when (isRecording) {
                 true -> VoiceMessageState.Recording(level = voiceLevel)
                 false -> VoiceMessageState.Idle
             },

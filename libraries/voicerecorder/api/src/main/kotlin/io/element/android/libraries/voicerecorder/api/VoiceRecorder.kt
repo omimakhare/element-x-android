@@ -19,6 +19,7 @@ package io.element.android.libraries.voicerecorder.api
 import android.Manifest
 import androidx.annotation.RequiresPermission
 import kotlinx.coroutines.flow.StateFlow
+import java.io.File
 
 /**
  * Audio recorder which records audio to opus/ogg files.
@@ -39,7 +40,7 @@ interface VoiceRecorder {
      *
      * Call [deleteRecording] to delete any recorded audio.
      */
-    suspend fun stopRecord()
+    suspend fun stopRecord(): File?
 
     /**
      * Stop the current recording and delete the output file.
