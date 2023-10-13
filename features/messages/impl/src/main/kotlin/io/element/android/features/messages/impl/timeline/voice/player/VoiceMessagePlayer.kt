@@ -30,12 +30,21 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 interface VoiceMessagePlayer : AutoCloseable {
-    val isPlaying: StateFlow<Boolean>
+    val status: StateFlow<Status>
     val progress: Progress
     fun playMediaUri(uri: String)
     fun play()
     fun pause()
     fun seekTo(percentage: Float)
+
+    data class Status(
+        val isPlaying: Boolean,
+        val uri: String?,
+    ) {
+        companion object {
+            val Empty = Status(false, null)
+        }
+    }
 
     data class Progress(
         val elapsedMinutes: Int,
@@ -59,7 +68,7 @@ class VoiceMessagePlayerImpl @Inject constructor(
     @ApplicationContext context: Context,
 ) : VoiceMessagePlayer {
 
-    private val playerLazy = lazy {
+    private val playerLazy: Lazy<Player> = lazy {
         ExoPlayer.Builder(context)
             .build()
             .apply {
@@ -68,16 +77,20 @@ class VoiceMessagePlayerImpl @Inject constructor(
             }
     }
 
-    private val player by playerLazy
+    private val player: Player by playerLazy
 
-    private val listener = object : Player.Listener {
+    private val listener: Player.Listener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) {
-            _isPlaying.value = isPlaying
+            _status.value = if (isPlaying) {
+                VoiceMessagePlayer.Status(true, player.currentMediaItem?.localConfiguration?.uri.toString())
+            } else {
+                VoiceMessagePlayer.Status(false, player.currentMediaItem?.localConfiguration?.uri.toString())
+            }
         }
     }
 
-    private val _isPlaying = MutableStateFlow(false)
-    override val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
+    private val _status: MutableStateFlow<VoiceMessagePlayer.Status> = MutableStateFlow(VoiceMessagePlayer.Status.Empty)
+    override val status: StateFlow<VoiceMessagePlayer.Status> = _status.asStateFlow()
 
     override val progress: VoiceMessagePlayer.Progress
         get() = VoiceMessagePlayer.Progress(

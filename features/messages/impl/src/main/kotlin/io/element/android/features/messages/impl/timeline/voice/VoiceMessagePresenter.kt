@@ -70,7 +70,7 @@ class VoiceMessagePresenter @AssistedInject constructor(
         val scope = rememberCoroutineScope()
         val durationMinutes = remember { content.duration / 1000 / 60 }
         val durationSeconds = remember { content.duration / 1000 % 60 }
-        val isPlaying by voiceMessagePlayer.isPlaying.collectAsState()
+        val playerStatus by voiceMessagePlayer.status.collectAsState()
 
         var button by remember { mutableStateOf(VoiceMessageState.Button.Play) }
         var progress by remember { mutableStateOf(VoiceMessagePlayer.Progress.Zero) }
@@ -84,16 +84,21 @@ class VoiceMessagePresenter @AssistedInject constructor(
             }
         }
 
-        LaunchedEffect(isPlaying) {
-            Timber.d("ABAB Presenter isPlaying: $isPlaying")
-            if (isPlaying) {
-                button = VoiceMessageState.Button.Pause
-                while (true) {
-                    progress = voiceMessagePlayer.progress
-                    delay(100)
+        LaunchedEffect(playerStatus) {
+            Timber.d("ABAB Presenter isPlaying: $playerStatus")
+            if (playerStatus.uri == mediaFile?.path()) {
+                when (playerStatus.isPlaying) {
+                    true -> {
+                        button = VoiceMessageState.Button.Pause
+                        while (true) {
+                            progress = voiceMessagePlayer.progress
+                            delay(100)
+                        }
+                    }
+                    false -> {
+                        button = VoiceMessageState.Button.Play
+                    }
                 }
-            } else {
-                button = VoiceMessageState.Button.Play
             }
         }
 
@@ -117,7 +122,7 @@ class VoiceMessagePresenter @AssistedInject constructor(
                     if (mediaFile == null) {
                         downloadMediaAndPlay()
                     } else {
-                        if (!voiceMessagePlayer.isPlaying.value) {
+                        if (!voiceMessagePlayer.status.value.isPlaying) {
                             voiceMessagePlayer.play()
                         } else {
                             voiceMessagePlayer.pause()
@@ -134,7 +139,7 @@ class VoiceMessagePresenter @AssistedInject constructor(
         return VoiceMessageState(
             button = button,
             progress = progress.percentage,
-            elapsed = if (isPlaying) "%02d:%02d".format(progress.elapsedMinutes, progress.elapsedSeconds)
+            elapsed = if (playerStatus.isPlaying) "%02d:%02d".format(progress.elapsedMinutes, progress.elapsedSeconds)
             else "%02d:%02d".format(durationMinutes, durationSeconds),
             eventSink = ::eventSink
         )
