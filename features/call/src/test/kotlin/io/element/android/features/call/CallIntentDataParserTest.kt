@@ -17,6 +17,7 @@
 package io.element.android.features.call
 
 import com.google.common.truth.Truth.assertThat
+import io.element.android.features.call.utils.CallIntentDataParser
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
