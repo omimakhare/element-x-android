@@ -163,6 +163,7 @@ fun MessagesView(
                 MessagesViewTopBar(
                     roomName = state.roomName.dataOrNull(),
                     roomAvatar = state.roomAvatar.dataOrNull(),
+                    inRoomCallsEnabled = state.enableInRoomCalls,
                     onBackPressed = onBackPressed,
                     onRoomDetailsClicked = onRoomDetailsClicked,
                     onJoinCallClicked = onJoinCallClicked,
@@ -345,6 +346,7 @@ private fun MessagesViewContent(
 private fun MessagesViewTopBar(
     roomName: String?,
     roomAvatar: AvatarData?,
+    inRoomCallsEnabled: Boolean,
     modifier: Modifier = Modifier,
     onRoomDetailsClicked: () -> Unit = {},
     onJoinCallClicked: () -> Unit = {},
@@ -371,8 +373,10 @@ private fun MessagesViewTopBar(
             }
         },
         actions = {
-            IconButton(onClick = onJoinCallClicked) {
-                Icon(CommonDrawables.ic_compound_video_call, contentDescription = "Join call")
+            if (inRoomCallsEnabled) {
+                IconButton(onClick = onJoinCallClicked) {
+                    Icon(CommonDrawables.ic_compound_video_call, contentDescription = "Join call")
+                }
             }
         },
         windowInsets = WindowInsets(0.dp)
