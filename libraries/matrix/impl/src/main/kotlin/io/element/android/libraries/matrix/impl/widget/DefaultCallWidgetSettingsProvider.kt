@@ -20,13 +20,14 @@ import com.squareup.anvil.annotations.ContributesBinding
 import io.element.android.libraries.di.AppScope
 import io.element.android.libraries.matrix.api.widget.CallWidgetSettingsProvider
 import io.element.android.libraries.matrix.api.widget.MatrixWidgetSettings
+import org.matrix.rustcomponents.sdk.VirtualElementCallWidgetOptions
 import org.matrix.rustcomponents.sdk.newVirtualElementCallWidget
 import javax.inject.Inject
 
 @ContributesBinding(AppScope::class)
 class DefaultCallWidgetSettingsProvider @Inject constructor() : CallWidgetSettingsProvider {
     override fun provide(baseUrl: String, widgetId: String): MatrixWidgetSettings {
-        val rustWidgetSettings = newVirtualElementCallWidget(
+        val options = VirtualElementCallWidgetOptions(
             elementCallUrl = baseUrl,
             widgetId = widgetId,
             parentUrl = null,
@@ -39,7 +40,7 @@ class DefaultCallWidgetSettingsProvider @Inject constructor() : CallWidgetSettin
             fonts = null,
             analyticsId = null
         )
-
+        val rustWidgetSettings = newVirtualElementCallWidget(options)
         return MatrixWidgetSettings.fromRustWidgetSettings(rustWidgetSettings)
     }
 }
