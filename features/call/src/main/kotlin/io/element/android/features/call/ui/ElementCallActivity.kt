@@ -17,7 +17,6 @@
 package io.element.android.features.call.ui
 
 import android.Manifest
-import android.R
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
@@ -227,9 +226,9 @@ class ElementCallActivity : NodeComponentActivity(), CallScreenNavigator {
         isDarkMode = currentNightMode != 0
         if (prevDarkMode != isDarkMode) {
             if (isDarkMode) {
-                window.setBackgroundDrawableResource(R.drawable.screen_background_dark)
+                window.setBackgroundDrawableResource(android.R.drawable.screen_background_dark)
             } else {
-                window.setBackgroundDrawableResource(R.drawable.screen_background_light)
+                window.setBackgroundDrawableResource(android.R.drawable.screen_background_light)
             }
         }
     }

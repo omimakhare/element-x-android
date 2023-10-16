@@ -56,7 +56,7 @@ class WidgetMessageInterceptor(
                                 || !message.data.response && message.data.api == "fromWidget") {
                                 let json = JSON.stringify(event.data) 
                                 console.log('message sent: ' + json);
-                                $LISTENER_NAME.postMessage(json);
+                                ${LISTENER_NAME}.postMessage(json);
                             } else {
                                 console.log('message received (ignored): ' + JSON.stringify(event.data));
                             }

@@ -16,13 +16,16 @@
 
 package io.element.android.features.preferences.impl.advanced
 
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import io.element.android.features.preferences.impl.R
-import io.element.android.libraries.designsystem.components.preferences.PreferenceSwitch
 import io.element.android.libraries.designsystem.components.preferences.PreferencePage
+import io.element.android.libraries.designsystem.components.preferences.PreferenceSwitch
+import io.element.android.libraries.designsystem.components.preferences.PreferenceTextField
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.ui.strings.CommonStrings
@@ -50,6 +53,18 @@ fun AdvancedSettingsView(
             isChecked = state.isDeveloperModeEnabled,
             onCheckedChange = { state.eventSink(AdvancedSettingsEvents.SetDeveloperModeEnabled(it)) },
         )
+        state.customElementCallBaseUrlState?.let { callUrlState ->
+            PreferenceTextField(
+                headline = "Custom Element Call base URL",
+                placeholder = "Leave empty to use the default one.",
+                value = callUrlState.baseUrl,
+                supportingText = "Set a custom base URL for Element Call.",
+                validation = callUrlState.validator,
+                onValidationErrorMessage = "Invalid URL",
+                keyboardOptions = KeyboardOptions.Default.copy(autoCorrect = false, keyboardType = KeyboardType.Uri),
+                onChange = { state.eventSink(AdvancedSettingsEvents.SetCustomElementCallBaseUrl(it)) }
+            )
+        }
     }
 }
 

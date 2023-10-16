@@ -37,6 +37,7 @@ dependencies {
     implementation(projects.libraries.designsystem)
     implementation(projects.libraries.matrix.impl)
     implementation(projects.libraries.network)
+    implementation(projects.libraries.preferences.api)
     implementation(libs.androidx.webkit)
     implementation(libs.serialization.json)
     ksp(libs.showkase.processor)

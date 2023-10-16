@@ -27,26 +27,28 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import io.element.android.appnav.di.MatrixClientsHolder
 import io.element.android.features.call.CallType
+import io.element.android.features.call.data.WidgetMessage
+import io.element.android.features.call.utils.Constants
 import io.element.android.features.call.utils.WidgetMessageInterceptor
+import io.element.android.features.call.utils.WidgetMessageSerializer
 import io.element.android.features.call.widgetdriver.CallWidgetDriver
+import io.element.android.features.preferences.api.store.PreferencesStore
 import io.element.android.libraries.architecture.Async
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.architecture.runCatchingUpdatingState
 import io.element.android.libraries.network.useragent.UserAgentProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import timber.log.Timber
 import java.util.UUID
 
 class CallScreenPresenter @AssistedInject constructor(
     private val matrixClientsHolder: MatrixClientsHolder,
     private val userAgentProvider: UserAgentProvider,
+    private val preferencesStore: PreferencesStore,
     @Assisted private val inputs: CallType,
     @Assisted private val navigator: CallScreenNavigator,
 ) : Presenter<CallScreenState> {
@@ -54,11 +56,6 @@ class CallScreenPresenter @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(inputs: CallType, navigator: CallScreenNavigator): CallScreenPresenter
-    }
-
-    // TODO: Move to a config file, restore `.io` domain
-    companion object {
-        private const val BASE_URL = "https://call.element.dev"
     }
 
     private val isInWidgetMode = inputs is CallType.RoomCall
@@ -145,7 +142,8 @@ class CallScreenPresenter @AssistedInject constructor(
                     val room = matrixClientsHolder.getOrNull(inputs.sessionId)
                         ?.getRoom(inputs.roomId)
                         ?: error("Room not found")
-                    val driver = CallWidgetDriver.create(room, BASE_URL, UUID.randomUUID().toString())
+                    val baseUrl = preferencesStore.getCustomElementCallBaseUrlFlow().firstOrNull() ?: Constants.BASE_URL
+                    val driver = CallWidgetDriver.create(room, baseUrl, UUID.randomUUID().toString())
                     callWidgetDriver.value = driver
                     driver.url
                 }
@@ -154,10 +152,7 @@ class CallScreenPresenter @AssistedInject constructor(
     }
 
     private fun parseMessage(message: String): WidgetMessage? {
-        val jsonDecoder = Json { ignoreUnknownKeys = true }
-        return runCatching { jsonDecoder.decodeFromString(WidgetMessage.serializer(), message) }
-            .onFailure { Timber.e(it) }
-            .getOrNull()
+        return WidgetMessageSerializer.deserialize(message).getOrNull()
     }
 
     private fun sendHangupMessage(widgetId: String, messageInterceptor: WidgetMessageInterceptor) {
@@ -167,31 +162,8 @@ class CallScreenPresenter @AssistedInject constructor(
             requestId = "widgetapi-${System.currentTimeMillis()}",
             action = WidgetMessage.Action.HangUp,
         )
-        val json = Json.encodeToString(WidgetMessage.serializer(), message)
-        messageInterceptor.sendMessage(json)
+        messageInterceptor.sendMessage(WidgetMessageSerializer.serialize(message))
     }
 
 }
 
-@Serializable
-data class WidgetMessage(
-    @SerialName("api") val direction: Direction,
-    @SerialName("widgetId") val widgetId: String,
-    @SerialName("requestId") val requestId: String,
-    @SerialName("action") val action: Action,
-) {
-
-    @Serializable
-    enum class Direction {
-        @SerialName("fromWidget")
-        FromWidget,
-        @SerialName("toWidget")
-        ToWidget
-    }
-
-    @Serializable
-    enum class Action {
-        @SerialName("im.vector.hangup")
-        HangUp
-    }
-}

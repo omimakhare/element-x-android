@@ -30,8 +30,8 @@ import com.bumble.appyx.navmodel.backstack.operation.push
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.element.android.anvilannotations.ContributesNode
-import io.element.android.features.call.ui.ElementCallActivity
 import io.element.android.features.call.CallType
+import io.element.android.features.call.ui.ElementCallActivity
 import io.element.android.features.location.api.Location
 import io.element.android.features.location.api.SendLocationEntryPoint
 import io.element.android.features.location.api.ShowLocationEntryPoint
@@ -61,7 +61,6 @@ import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.media.MediaSource
 import io.element.android.libraries.matrix.api.timeline.item.TimelineItemDebugInfo
-import io.element.android.libraries.matrix.api.widget.CallWidgetSettingsProvider
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.parcelize.Parcelize
 
@@ -71,7 +70,6 @@ class MessagesFlowNode @AssistedInject constructor(
     @Assisted plugins: List<Plugin>,
     @ApplicationContext private val context: Context,
     private val matrixClient: MatrixClient,
-    private val callWidgetSettingsProvider: CallWidgetSettingsProvider,
     private val sendLocationEntryPoint: SendLocationEntryPoint,
     private val showLocationEntryPoint: ShowLocationEntryPoint,
     private val createPollEntryPoint: CreatePollEntryPoint,

@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-package io.element.android.features.preferences.impl.advanced
+package io.element.android.features.call.utils
 
-data class AdvancedSettingsState(
-    val isRichTextEditorEnabled: Boolean,
-    val isDeveloperModeEnabled: Boolean,
-    val customElementCallBaseUrlState: CustomElementCallBaseUrlState?,
-    val eventSink: (AdvancedSettingsEvents) -> Unit
-)
-
-data class CustomElementCallBaseUrlState(
-    val baseUrl: String?,
-    val validator: (String?) -> Boolean,
-)
+object Constants {
+    internal const val BASE_URL = "https://call.element.dev"
+}

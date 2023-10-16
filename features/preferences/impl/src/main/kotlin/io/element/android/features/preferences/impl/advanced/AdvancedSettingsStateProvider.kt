@@ -24,14 +24,17 @@ open class AdvancedSettingsStateProvider : PreviewParameterProvider<AdvancedSett
             aAdvancedSettingsState(),
             aAdvancedSettingsState(isRichTextEditorEnabled = true),
             aAdvancedSettingsState(isDeveloperModeEnabled = true),
+            aAdvancedSettingsState(customElementCallBaseUrl = "https://call.element.dev"),
         )
 }
 
 fun aAdvancedSettingsState(
     isRichTextEditorEnabled: Boolean = false,
     isDeveloperModeEnabled: Boolean = false,
+    customElementCallBaseUrl: String? = null,
 ) = AdvancedSettingsState(
     isRichTextEditorEnabled = isRichTextEditorEnabled,
     isDeveloperModeEnabled = isDeveloperModeEnabled,
+    customElementCallBaseUrlState = customElementCallBaseUrl?.let { CustomElementCallBaseUrlState(it) { true } },
     eventSink = {}
 )
